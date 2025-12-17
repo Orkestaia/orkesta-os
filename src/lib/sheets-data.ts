@@ -59,3 +59,14 @@ export async function getCRMData(): Promise<CRMRow[]> {
 export async function getFinanceData(): Promise<FinanceRow[]> {
     return fetchAndParse<FinanceRow>(FINANCE_SHEET_URL);
 }
+
+export const MOCK_TASKS = [
+    { id: '1', title: 'Design System Update', status: 'To Do', priority: 'High', type: 'Design' },
+    { id: '2', title: 'Client Meeting - Alpha Corp', status: 'In Progress', priority: 'Medium', type: 'CRM' },
+    { id: '3', title: 'Q4 Financial Report', status: 'Review', priority: 'High', type: 'Finance' },
+    { id: '4', title: 'Fix Login Bug', status: 'Done', priority: 'Critical', type: 'Dev' },
+];
+
+export async function getTasksData() {
+    return MOCK_TASKS;
+}
