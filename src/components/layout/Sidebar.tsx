@@ -43,8 +43,8 @@ export function Sidebar() {
                 "fixed inset-y-0 left-0 z-40 w-64 transform bg-[#0B0E14] border-r border-gray-800 transition-transform duration-200 ease-in-out lg:translate-x-0",
                 isOpen ? "translate-x-0" : "-translate-x-full"
             )}>
-                <div className="flex h-16 items-center px-6 border-b border-gray-800">
-                    <img src="/orkesta-logo.png" alt="Orkesta OS" className="h-8 w-auto" />
+                <div className="flex h-24 items-center px-6 border-b border-gray-800">
+                    <img src="/orkesta-logo.png" alt="Orkesta OS" className="h-16 w-auto" />
                 </div>
 
                 <nav className="flex-1 space-y-1 px-3 py-4">
