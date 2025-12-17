@@ -1,0 +1,343 @@
+{
+    "name": "Orkesta OS - Advanced Sync (Multi-Sheet) v3",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "minutes",
+                            "minutes": 15
+                        }
+                    ]
+                }
+            },
+            "name": "Schedule",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "documentId": {
+                    "__rl": true,
+                    "value": "17d7z98L7Yu3ZdJBfQ60VQCFfM_ZJWeCOG9WY-kId38Q",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "gid=0",
+                    "mode": "list",
+                    "cachedResultName": "Sheet1"
+                },
+                "options": {}
+            },
+            "name": "Get CRM Data",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 3,
+            "position": [
+                300,
+                200
+            ],
+            "credentials": {
+                "googleApi": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets Account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json.Empresa || $json.Company }}",
+                            "operation": "isNotEmpty"
+                        }
+                    ]
+                }
+            },
+            "name": "Filter Valid Rows",
+            "type": "n8n-nodes-base.filter",
+            "typeVersion": 1,
+            "position": [
+                500,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "tableId": "clients",
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "name": "={{ $json.Empresa || $json.Company }}",
+                        "employees_range": "={{ $json.Empleados }}",
+                        "tax_id": "={{ $json.NIF }}"
+                    },
+                    "matchingColumns": [
+                        "name"
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Upsert Clients",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                700,
+                200
+            ],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "YOUR_SUPABASE_CREDENTIAL_ID",
+                    "name": "Supabase Account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "tableId": "leads",
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "email": "={{ $json.Email }}",
+                        "contact_name": "={{ $json.Name }}",
+                        "status": "={{ $json.Estado }}",
+                        "qualification": "={{ $json.Cualificación }}"
+                    },
+                    "matchingColumns": [
+                        "email"
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Upsert Leads",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                900,
+                200
+            ],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "YOUR_SUPABASE_CREDENTIAL_ID",
+                    "name": "Supabase Account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "documentId": {
+                    "__rl": true,
+                    "value": "1k2kkHqtxm_PQQvLhuPGvGMCXL1nczza_tTgmC37-mzo",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "gid=0",
+                    "mode": "list",
+                    "cachedResultName": "Sheet1"
+                },
+                "options": {}
+            },
+            "name": "Get Invoices",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 3,
+            "position": [
+                300,
+                500
+            ],
+            "credentials": {
+                "googleApi": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets Account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "tableId": "clients",
+                "returnAll": true
+            },
+            "name": "Fetch All Clients",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                500,
+                600
+            ],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "YOUR_SUPABASE_CREDENTIAL_ID",
+                    "name": "Supabase Account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "mode": "combine",
+                "combinationMode": "mergeBy",
+                "mergeByFields": {
+                    "values": [
+                        {
+                            "field1": "Cliente",
+                            "field2": "name"
+                        }
+                    ]
+                },
+                "joinMode": "left",
+                "options": {}
+            },
+            "name": "Merge Client IDs",
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 2,
+            "position": [
+                700,
+                500
+            ],
+            "inputData": [
+                {
+                    "index": 0,
+                    "node": "Get Invoices"
+                },
+                {
+                    "index": 1,
+                    "node": "Fetch All Clients"
+                }
+            ]
+        },
+        {
+            "parameters": {
+                "tableId": "invoices",
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "invoice_number": "={{ $json['Número de factura'] }}",
+                        "client_id": "={{ $json.id }}",
+                        "amount": "={{ $json.Importe }}",
+                        "issue_date": "={{ $json.Fecha }}",
+                        "status": "={{ $json.Pagada ? 'Paid' : 'Sent' }}",
+                        "total": "={{ $json.Total }}"
+                    },
+                    "matchingColumns": [
+                        "invoice_number"
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Upsert Invoices",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                900,
+                500
+            ],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "YOUR_SUPABASE_CREDENTIAL_ID",
+                    "name": "Supabase Account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Schedule": {
+            "main": [
+                [
+                    {
+                        "node": "Get CRM Data",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Get Invoices",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get CRM Data": {
+            "main": [
+                [
+                    {
+                        "node": "Filter Valid Rows",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filter Valid Rows": {
+            "main": [
+                [
+                    {
+                        "node": "Upsert Clients",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Upsert Clients": {
+            "main": [
+                [
+                    {
+                        "node": "Upsert Leads",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Invoices": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Client IDs",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch All Clients": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Client IDs",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Merge Client IDs": {
+            "main": [
+                [
+                    {
+                        "node": "Upsert Invoices",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Upsert Leads": {
+            "main": [
+                [
+                    {
+                        "node": "Fetch All Clients",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
