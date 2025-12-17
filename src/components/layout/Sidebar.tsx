@@ -44,9 +44,7 @@ export function Sidebar() {
                 isOpen ? "translate-x-0" : "-translate-x-full"
             )}>
                 <div className="flex h-16 items-center px-6 border-b border-gray-800">
-                    <h1 className="text-xl font-bold tracking-tight text-white">
-                        <span className="text-cyan-500">Orkesta</span> OS
-                    </h1>
+                    <img src="/orkesta-logo.png" alt="Orkesta OS" className="h-8 w-auto" />
                 </div>
 
                 <nav className="flex-1 space-y-1 px-3 py-4">
