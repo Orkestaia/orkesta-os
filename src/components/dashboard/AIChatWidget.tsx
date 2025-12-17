@@ -76,8 +76,8 @@ export function AIChatWidget() {
                             >
                                 <div
                                     className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm ${msg.role === 'user'
-                                            ? 'bg-cyan-600 text-white rounded-tr-none'
-                                            : 'bg-gray-800 text-gray-200 rounded-tl-none'
+                                        ? 'bg-cyan-600 text-white rounded-tr-none'
+                                        : 'bg-gray-800 text-gray-200 rounded-tl-none'
                                         }`}
                                 >
                                     {msg.content}
@@ -95,7 +95,7 @@ export function AIChatWidget() {
                             placeholder="Type a command..."
                             className="flex-1 bg-gray-950 border border-gray-700 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
                         />
-                        <Button size="icon" onClick={handleSend} className="bg-cyan-600 hover:bg-cyan-700">
+                        <Button onClick={handleSend} className="bg-cyan-600 hover:bg-cyan-700 h-9 w-9 p-0">
                             <Send className="h-4 w-4" />
                         </Button>
                     </div>
