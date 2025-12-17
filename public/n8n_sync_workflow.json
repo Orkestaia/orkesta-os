@@ -1,0 +1,150 @@
+{
+    "name": "Orkesta OS - Sheets to Supabase Sync",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "minutes",
+                            "minutes": 15
+                        }
+                    ]
+                }
+            },
+            "name": "Schedule",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "authentication": "serviceAccount",
+                "documentId": {
+                    "__rl": true,
+                    "value": "17d7z98L7Yu3ZdJBfQ60VQCFfM_ZJWeCOG9WY-kId38Q",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "gid=0",
+                    "mode": "list",
+                    "cachedResultName": "Sheet1"
+                },
+                "options": {}
+            },
+            "name": "Read CRM Sheet",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 3,
+            "position": [
+                450,
+                300
+            ],
+            "credentials": {
+                "googleApi": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets Account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "tableId": "clients",
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "name": "={{ $json.Empresa }}",
+                        "employees_range": "={{ $json.Empleados }}",
+                        "tax_id": "={{ $json.NIF }}"
+                    },
+                    "matchingColumns": [
+                        "name"
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Sync Clients",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                650,
+                300
+            ],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "YOUR_SUPABASE_CREDENTIAL_ID",
+                    "name": "Supabase Account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "tableId": "leads",
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "email": "={{ $json.Email }}",
+                        "contact_name": "={{ $json.Name }}",
+                        "status": "={{ $json.Estado }}",
+                        "qualification": "={{ $json.Cualificación }}"
+                    },
+                    "matchingColumns": [
+                        "email"
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Sync Leads",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                850,
+                300
+            ],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "YOUR_SUPABASE_CREDENTIAL_ID",
+                    "name": "Supabase Account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Schedule": {
+            "main": [
+                [
+                    {
+                        "node": "Read CRM Sheet",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Read CRM Sheet": {
+            "main": [
+                [
+                    {
+                        "node": "Sync Clients",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Sync Clients": {
+            "main": [
+                [
+                    {
+                        "node": "Sync Leads",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
